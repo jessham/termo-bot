@@ -5,6 +5,9 @@ const bot = new TelegramBot(token, { polling: true });
 // Estrutura de dados: { numeroDoJogo: { userId: tentativas } }
 let resultados = {};
 let ranking = {}; // pontos acumulados
+let nomes = {};
+
+const rainha = "jessica"; // Nome especial para condição
 
 // Regex para capturar mensagens do Term.ooo
 const regex = /#(\d+)\s+\*(\d)\/6/;
@@ -12,8 +15,10 @@ const regex = /#(\d+)\s+\*(\d)\/6/;
 bot.on("message", (msg) => {
   const chatId = msg.chat.id;
   const userId = msg.from.id;
-  const username = msg.from.username || msg.from.first_name;
+  const username = msg.from.first_name || msg.from.username || "Jogador sem nome";
   const texto = msg.text;
+
+  if (!texto) return;
 
   const match = regex.exec(texto);
   if (match) {
@@ -22,6 +27,7 @@ bot.on("message", (msg) => {
 
     if (!resultados[numeroJogo]) resultados[numeroJogo] = {};
     resultados[numeroJogo][userId] = tentativas;
+    nomes[userId] = username;
 
     bot.sendMessage(chatId, `📥 Resultado registrado para ${username}: ${tentativas}/6 no jogo #${numeroJogo}`);
 
@@ -41,11 +47,38 @@ bot.on("message", (msg) => {
 
       let rankingTexto = Object.entries(ranking)
         .map(([id, pontos]) => {
-          return `${id == userId ? username : "Jogador " + id}: ${pontos} ponto(s)`;
+          const nomes = nomes[id] || `Jogador ${id}`;
+          return `${nome}: ${pontos} ponto(s)`;
         })
         .join("\n");
 
-      bot.sendMessage(chatId, `🏆 Jogo #${numeroJogo}\nMenor tentativa: ${menor}/6\nGanhador: ${vencedores.length}\n\n📊 Ranking:\n${rankingTexto}`);
+      // Mensagem de parabéns ou empate
+      let resumoPartida = "";
+      if (vencedores.length === 1) {
+        const vencedorId = vencedores[0];
+        const nomeVencedor = nomes[vencedorId];
+
+        resumoPartida = `🏆 Parabéns ${nomeVencedor}! Você ganhou o jogo #${numeroJogo} com ${menor}/6 tentativas.`;
+
+        // Condição especial para Jessica
+        if (nomeVencedor.toLowerCase().includes(rainha)) {
+          resumoPartida += `\n🎉 Rainha do Term.ooo!!`;
+        } else {
+          resumoPartida += `\n😒 Espero que perca na próxima...`;
+        }
+
+      } else {
+        const lista = vencedores.map((id) => nomes[id]).join(", ");
+        resumoPartida = `🤝 Empate no jogo #${numeroJogo}! Ambos venceram com ${menor}/6 tentativas.`;
+
+        // Se Jessica estiver entre os empatados
+        if (lista.toLowerCase().includes(rainha)) {
+          resumoPartida += `\n👏 Jessica sempre se destaca mesmo no empate!`;
+        }
+}
+
+      bot.sendMessage(chatId, resumoPartida);
+      bot.sendMessage(chatId, `🏅 Placar:\n${rankingTexto}`);
     }
   }
 });
