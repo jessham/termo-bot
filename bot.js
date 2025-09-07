@@ -47,8 +47,8 @@ bot.on("message", (msg) => {
 
       let rankingTexto = Object.entries(ranking)
         .map(([id, pontos]) => {
-          const nomes = nomes[id] || `Jogador ${id}`;
-          return `${nome}: ${pontos} ponto(s)`;
+          const nomeJogador = nomes[id] || `Jogador ${id}`;
+          return `${nomeJogador}: ${pontos} ponto(s)`;
         })
         .join("\n");
 
@@ -75,7 +75,7 @@ bot.on("message", (msg) => {
         if (lista.toLowerCase().includes(rainha)) {
           resumoPartida += `\n👏 Jessica sempre se destaca mesmo no empate!`;
         }
-}
+      }
 
       bot.sendMessage(chatId, resumoPartida);
       bot.sendMessage(chatId, `🏅 Placar:\n${rankingTexto}`);
