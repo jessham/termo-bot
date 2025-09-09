@@ -18,8 +18,6 @@ bot.on("message", (msg) => {
   const username = msg.from.first_name || msg.from.username || "Jogador sem nome";
   const texto = msg.text;
 
-  if (!texto) return;
-
   const match = regex.exec(texto);
   if (match) {
     const numeroJogo = match[1]; // Ex: 1343
