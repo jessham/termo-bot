@@ -10,13 +10,15 @@ let nomes = {};
 const rainha = "jessica"; // Nome especial para condição
 
 // Regex para capturar mensagens do Term.ooo
-const regex = /#(\d+)\s+\*(\d)\/6/;
+const regex = /#(\d+)\s+\*(\d{1,2})\/6/;
 
 bot.on("message", (msg) => {
   const chatId = msg.chat.id;
   const userId = msg.from.id;
   const username = msg.from.first_name || msg.from.username || "Jogador sem nome";
   const texto = msg.text;
+
+  if (!texto) return;
 
   const match = regex.exec(texto);
   if (match) {
@@ -44,6 +46,7 @@ bot.on("message", (msg) => {
       });
 
       let rankingTexto = Object.entries(ranking)
+        .sort((a, b) => b[1] - a[1])
         .map(([id, pontos]) => {
           const nomeJogador = nomes[id] || `Jogador ${id}`;
           return `${nomeJogador}: ${pontos} ponto(s)`;
@@ -59,7 +62,7 @@ bot.on("message", (msg) => {
         resumoPartida = `🏆 Parabéns ${nomeVencedor}! Você ganhou o jogo #${numeroJogo} com ${menor}/6 tentativas.`;
 
         // Condição especial para Jessica
-        if (nomeVencedor.toLowerCase().includes(rainha)) {
+        if (nomeVencedor.toLowerCase() === rainha) {
           resumoPartida += `\n🎉 Rainha do Term.ooo!!`;
         } else {
           resumoPartida += `\n😒 Espero que perca na próxima...`;
