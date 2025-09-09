@@ -77,8 +77,7 @@ bot.on("message", (msg) => {
         }
       }
 
-      bot.sendMessage(chatId, resumoPartida);
-      bot.sendMessage(chatId, `🏅 Placar:\n${rankingTexto}`);
+      bot.sendMessage(chatId, `${resumoPartida}\n\n🏅 Placar:\n${rankingTexto}`);
     }
   }
 });
