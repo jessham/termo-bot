@@ -11,7 +11,7 @@ let nomes = {};
 const rainha = "jessica"; // Nome especial para condição
 
 // Regex para capturar mensagens do Term.ooo
-const regex = /#(\d+)\s+\*(\d{1,2})\/6/;
+const regex = /#(\d+).*?(\d)\/6/;
 
 // ================== FUNÇÕES DE PERSISTÊNCIA ==================
 function salvarDados() {
