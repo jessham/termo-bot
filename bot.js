@@ -1,4 +1,3 @@
-const fs = require("fs");
 const TelegramBot = require("node-telegram-bot-api");
 const token = process.env.BOT_TOKEN;
 const bot = new TelegramBot(token, { polling: true });
@@ -13,33 +12,15 @@ const rainha = "jessica"; // Nome especial para condição
 // Regex para capturar mensagens do Term.ooo
 const regex = /#(\d+).*?(\d)\/6/;
 
-// ================== FUNÇÕES DE PERSISTÊNCIA ==================
-function salvarDados() {
-  const dados = { resultados, ranking, nomes };
-  fs.writeFileSync("dados.json", JSON.stringify(dados, null, 2));
-}
-
-function carregarDados() {
-  if (fs.existsSync("dados.json")) {
-    const raw = fs.readFileSync("dados.json");
-    const dados = JSON.parse(raw);
-    resultados = dados.resultados || {};
-    ranking = dados.ranking || {};
-    nomes = dados.nomes || {};
-  }
-}
-
-// Carrega os dados quando o bot inicia
-carregarDados();
-
 // ================== FUNÇÃO PARA MOSTRAR PLACAR ==================
 function gerarRankingTexto() {
   if (Object.keys(ranking).length === 0) {
     return "Ainda não há pontos registrados no ranking.";
   }
 
-  return Object.entries(ranking)
-    .sort((a, b) => b[1] - a[1]) // ordena do maior para o menor
+  return Object.keys(nomes)
+    .map((id) => [id, ranking[id] || 0])
+    .sort((a, b) => b[1] - a[1])
     .map(([id, pontos], idx) => {
       const nomeJogador = nomes[id] || `Jogador ${id}`;
       return `${idx + 1}º - ${nomeJogador}: ${pontos} ponto(s)`;
@@ -53,6 +34,8 @@ bot.on("message", (msg) => {
   const userId = msg.from.id;
   const username = msg.from.first_name || msg.from.username || "Jogador sem nome";
   const texto = msg.text;
+
+  console.log("UserID:", userId, "Username:", username);
 
   if (!texto) return; // ignora mensagens sem texto
 
@@ -72,7 +55,6 @@ bot.on("message", (msg) => {
     if (!resultados[numeroJogo]) resultados[numeroJogo] = {};
     resultados[numeroJogo][userId] = tentativas;
     nomes[userId] = username;
-    salvarDados();
 
     bot.sendMessage(chatId, `📥 Resultado registrado para ${username}: ${tentativas}/6 no jogo #${numeroJogo}`);
 
@@ -89,7 +71,6 @@ bot.on("message", (msg) => {
         if (!ranking[id]) ranking[id] = 0;
         ranking[id] += 1;
       });
-      salvarDados();
 
       const rankingTexto = gerarRankingTexto();
 
@@ -103,9 +84,9 @@ bot.on("message", (msg) => {
 
         // Condição especial para Jessica
         if (nomeVencedor.toLowerCase() === rainha) {
-          resumoPartida += `\n🎉 Rainha do Term.ooo!!`;
+          resumoPartida += `\n(🎉 Rainha do Term.ooo!!)`;
         } else {
-          resumoPartida += `\n😒 Espero que perca na próxima...`;
+          resumoPartida += `\n(😒 Espero que perca na próxima...)`;
         }
 
       } else {
@@ -114,7 +95,7 @@ bot.on("message", (msg) => {
 
         // Se Jessica estiver entre os empatados
         if (lista.toLowerCase().includes(rainha)) {
-          resumoPartida += `\n👏 Jessica sempre se destaca mesmo no empate!`;
+          resumoPartida += `\n(👏 Jessica sempre se destaca mesmo no empate!)`;
         }
       }
 
