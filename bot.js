@@ -18,11 +18,8 @@ const PONTOS_INICIAIS_ESPECIAIS = Object.fromEntries(
 
 const rainha = "jessica"; // Nome especial para condição
 
-// -------------------- Admins --------------------
-const ADMINS = new Set((process.env.ADMINS || "").split(","));
-
-// Regex para capturar mensagens do Term.ooo
-const regex = /#(\d+).*?(\d)\/6/;
+// Regex para capturar mensagens do Term.ooo (aceita dígito 0-6 ou X)
+const regex = /#(\d+).*?([0-6]|X)\/6/i;
 
 // ================== FUNÇÃO PARA MOSTRAR PLACAR ==================
 function gerarRankingTexto() {
@@ -48,11 +45,6 @@ bot.on("message", (msg) => {
   const texto = msg.text;
 
   if (!texto) return; // ignora mensagens sem texto
-
-  // ----- Mostra userId apenas para admins -----
-  if (ADMINS.has(userId)) {
-    console.log("UserID:", userId, "Username:", username);
-  }
 
   // ----- Comando /placar -----
   if (texto.startsWith("/placar")) {
@@ -99,9 +91,9 @@ bot.on("message", (msg) => {
 
         // Condição especial para Jessica
         if (nomeVencedor.toLowerCase() === rainha) {
-          resumoPartida += `\n(🎉 Rainha do Term.ooo!!!!!)`;
+          resumoPartida += `\n\n🎉 Rainha do Term.ooo!!!!!`;
         } else {
-          resumoPartida += `\n(😒 Espero que perca na próxima...)`;
+          resumoPartida += `\n\n😒 Espero que perca na próxima...)`;
         }
 
       } else {
@@ -110,7 +102,7 @@ bot.on("message", (msg) => {
 
         // Se Jessica estiver entre os empatados
         if (lista.toLowerCase().includes(rainha)) {
-          resumoPartida += `\n(👏 Jessica sempre se destaca mesmo no empate!)`;
+          resumoPartida += `\n\n👏 Jessica sempre se destaca mesmo no empate!`;
         }
       }
 
